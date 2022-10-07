@@ -22,6 +22,10 @@ $dom->formatOutput = true;
 $root = $dom->createElement('root');
 
 $item_query = buildQuery($pdo, "SELECT * FROM product");
+if (!$item_query) {
+	echo "Error while making query!";
+	exit;
+}
 
 while ($row = $item_query->fetch()) {
 	$item_node = $dom->createElement('item');
@@ -41,6 +45,10 @@ while ($row = $item_query->fetch()) {
 
 	$lang_query = buildQuery($pdo, "SELECT * FROM product_description WHERE product_id={$product_id}");
 
+	if (!$lang_query) {
+		echo "Error while making query!";
+		exit;
+	}
 
 	$descriptions = [];
 
@@ -97,6 +105,11 @@ while ($row = $item_query->fetch()) {
 
 	$special_query = buildQuery($pdo, "SELECT * FROM product_special WHERE product_id={$product_id}");
 
+	if (!$special_query) {
+		echo "Error while making query!";
+		exit;
+	}
+
 	if ($special_query) {
 		$special = $special_query->fetch();
 		$date = strtotime($special['date_end']);
@@ -111,6 +124,12 @@ while ($row = $item_query->fetch()) {
 	}
 
 	$category_query = buildQuery($pdo, "SELECT * FROM category_description WHERE category_id in (SELECT category_id from product_to_category WHERE product_id={$product_id} AND language_id=1)");
+
+	if (!$category_query) {
+		echo "Error while making query!";
+		exit;
+	}
+
 	$category = $category_query->fetch();
 
 	$category_node = $dom->createElement('category', $category['name']);
@@ -120,6 +139,12 @@ while ($row = $item_query->fetch()) {
 	$category_id = $category['category_id'];
 
 	$category_path_id_query = buildQuery($pdo, "SELECT path_id FROM category_path WHERE category_id={$category_id}");
+
+	if (!$category_path_id_query) {
+		echo "Error while making query!";
+		exit;
+	}
+
 	$categories_id = [];
 	foreach ($category_path_id_query->fetchAll() as $id) {
 		$categories_id[] = $id['path_id'];
@@ -128,6 +153,11 @@ while ($row = $item_query->fetch()) {
 	$categories_id = implode(', ', $categories_id);
 
 	$category_names_query = buildQuery($pdo, "SELECT name FROM category_description WHERE language_id=1 AND category_id IN ({$categories_id}) ORDER BY category_id");
+
+	if (!$category_names_query) {
+		echo "Error while making query!";
+		exit;
+	}
 
 	$category_names = [];
 	foreach ($category_names_query->fetchAll() as $category) {
